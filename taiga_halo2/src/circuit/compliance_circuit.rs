@@ -1,4 +1,4 @@
-use crate::circuit::blake2s::{vp_commitment_gadget, Blake2sChip, Blake2sConfig};
+// use crate::circuit::blake2s::{vp_commitment_gadget, Blake2sChip, Blake2sConfig};
 use crate::circuit::gadgets::assign_free_advice;
 use crate::circuit::hash_to_curve::HashToCurveConfig;
 use crate::circuit::integrity::{
@@ -8,12 +8,16 @@ use crate::circuit::merkle_circuit::{
     merkle_poseidon_gadget, MerklePoseidonChip, MerklePoseidonConfig,
 };
 use crate::constant::{
-    TaigaFixedBases, COMPLIANCE_ANCHOR_PUBLIC_INPUT_ROW_IDX,
-    COMPLIANCE_DELTA_CM_X_PUBLIC_INPUT_ROW_IDX, COMPLIANCE_DELTA_CM_Y_PUBLIC_INPUT_ROW_IDX,
-    COMPLIANCE_INPUT_VP_CM_1_ROW_IDX, COMPLIANCE_INPUT_VP_CM_2_ROW_IDX,
-    COMPLIANCE_NF_PUBLIC_INPUT_ROW_IDX, COMPLIANCE_OUTPUT_CM_PUBLIC_INPUT_ROW_IDX,
-    COMPLIANCE_OUTPUT_VP_CM_1_ROW_IDX, COMPLIANCE_OUTPUT_VP_CM_2_ROW_IDX,
-    TAIGA_COMMITMENT_TREE_DEPTH, VP_COMMITMENT_PERSONALIZATION_TO_FIELD,
+    TaigaFixedBases,
+    COMPLIANCE_ANCHOR_PUBLIC_INPUT_ROW_IDX,
+    COMPLIANCE_DELTA_CM_X_PUBLIC_INPUT_ROW_IDX,
+    COMPLIANCE_DELTA_CM_Y_PUBLIC_INPUT_ROW_IDX,
+    COMPLIANCE_INPUT_VP_CM_1_ROW_IDX, // COMPLIANCE_INPUT_VP_CM_2_ROW_IDX,
+    COMPLIANCE_NF_PUBLIC_INPUT_ROW_IDX,
+    COMPLIANCE_OUTPUT_CM_PUBLIC_INPUT_ROW_IDX,
+    COMPLIANCE_OUTPUT_VP_CM_1_ROW_IDX, // COMPLIANCE_OUTPUT_VP_CM_2_ROW_IDX,
+    TAIGA_COMMITMENT_TREE_DEPTH,
+    VP_COMMITMENT_PERSONALIZATION_TO_FIELD,
 };
 use crate::merkle_tree::LR;
 use crate::resource::Resource;
@@ -308,11 +312,11 @@ impl Circuit<pallas::Base> for ComplianceCircuit {
         //     input_resource_variables.resource_variables.logic.clone(),
         //     input_vp_cm_r,
         // )?;
-        // layouter.constrain_instance(
-        //     input_vp_commitment.cell(),
-        //     config.instances,
-        //     COMPLIANCE_INPUT_VP_CM_1_ROW_IDX,
-        // )?;
+        layouter.constrain_instance(
+            input_vp_commitment.cell(),
+            config.instances,
+            COMPLIANCE_INPUT_VP_CM_1_ROW_IDX,
+        )?;
         // layouter.constrain_instance(
         //     input_vp_commitment.cell(),
         //     config.instances,
@@ -335,17 +339,17 @@ impl Circuit<pallas::Base> for ComplianceCircuit {
                 output_vp_cm_r,
             ],
         )?;
+        layouter.constrain_instance(
+            output_vp_commitment.cell(),
+            config.instances,
+            COMPLIANCE_OUTPUT_VP_CM_1_ROW_IDX,
+        )?;
 
         // let output_vp_commitment = vp_commitment_gadget(
         //     &mut layouter,
         //     &blake2s_chip,
         //     output_resource_vars.resource_variables.logic.clone(),
         //     output_vp_cm_r,
-        // )?;
-        // layouter.constrain_instance(
-        //     output_vp_commitment.cell(),
-        //     config.instances,
-        //     COMPLIANCE_OUTPUT_VP_CM_1_ROW_IDX,
         // )?;
         // layouter.constrain_instance(
         //     output_vp_commitment.cell(),
