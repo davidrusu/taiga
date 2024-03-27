@@ -25,6 +25,7 @@ num-bigint = "0.4"
 rustler = { version = "0.29.1", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 borsh = { version = "1.1", features = ["derive"], optional = true }
+plotters = {version = "0.3.5", default_features=false, features=["ab_glyph", "svg_backend"], optional = true}
 
 [dev-dependencies]
 criterion = "0.5"
@@ -39,6 +40,10 @@ harness = false
 name = "vp_proof"
 harness = false
 
+[[bin]]
+name="render_circuits"
+required-features = ["render"]
+
 # [[example]]
 # name = "taiga_sudoku"
 
@@ -51,4 +56,5 @@ default = []
 nif = ["dep:rustler", "borsh", "pasta_curves/repr-erlang"]
 serde = ["dep:serde", "pasta_curves/serde"]
 borsh = ["dep:borsh"]
+render = ["dep:plotters"]
 examples = ["borsh"]

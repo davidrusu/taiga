@@ -25,6 +25,10 @@ pub const RESOURCE_COMMITMENT_PERSONALIZATION: &str = "Taiga-NoteCommit";
 pub const TRANSACTION_BINDING_HASH_PERSONALIZATION: &[u8; 16] = b"TxBindingSigHash";
 
 pub const VP_COMMITMENT_PERSONALIZATION: &[u8; 8] = b"VPCommit";
+lazy_static! {
+    pub static ref VP_COMMITMENT_PERSONALIZATION_TO_FIELD: pallas::Base =
+        to_field_elements(VP_COMMITMENT_PERSONALIZATION)[0];
+}
 
 pub const PRF_EXPAND_PERSONALIZATION: &[u8; 16] = b"Taiga_ExpandSeed";
 lazy_static! {

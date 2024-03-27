@@ -13,7 +13,7 @@ use crate::constant::{
     COMPLIANCE_INPUT_VP_CM_1_ROW_IDX, COMPLIANCE_INPUT_VP_CM_2_ROW_IDX,
     COMPLIANCE_NF_PUBLIC_INPUT_ROW_IDX, COMPLIANCE_OUTPUT_CM_PUBLIC_INPUT_ROW_IDX,
     COMPLIANCE_OUTPUT_VP_CM_1_ROW_IDX, COMPLIANCE_OUTPUT_VP_CM_2_ROW_IDX,
-    TAIGA_COMMITMENT_TREE_DEPTH,
+    TAIGA_COMMITMENT_TREE_DEPTH, VP_COMMITMENT_PERSONALIZATION_TO_FIELD,
 };
 use crate::merkle_tree::LR;
 use crate::resource::Resource;
@@ -35,6 +35,8 @@ use pasta_curves::pallas;
 
 use crate::circuit::resource_commitment::{ResourceCommitChip, ResourceCommitConfig};
 
+use super::gadgets::poseidon_hash::poseidon_hash_gadget;
+
 #[derive(Clone, Debug)]
 pub struct ComplianceConfig {
     instances: Column<Instance>,
@@ -45,7 +47,7 @@ pub struct ComplianceConfig {
     merkle_config: MerklePoseidonConfig,
     merkle_path_selector: Selector,
     hash_to_curve_config: HashToCurveConfig,
-    blake2s_config: Blake2sConfig<pallas::Base>,
+    // blake2s_config: Blake2sConfig<pallas::Base>,
     resource_commit_config: ResourceCommitConfig,
 }
 
@@ -148,7 +150,7 @@ impl Circuit<pallas::Base> for ComplianceCircuit {
         let hash_to_curve_config =
             HashToCurveConfig::configure(meta, advices, poseidon_config.clone());
 
-        let blake2s_config = Blake2sConfig::configure(meta, advices);
+        // let blake2s_config = Blake2sConfig::configure(meta, advices);
 
         let resource_commit_config = ResourceCommitChip::configure(
             meta,
@@ -166,7 +168,7 @@ impl Circuit<pallas::Base> for ComplianceCircuit {
             merkle_config,
             merkle_path_selector,
             hash_to_curve_config,
-            blake2s_config,
+            // blake2s_config,
             resource_commit_config,
         }
     }
@@ -198,7 +200,7 @@ impl Circuit<pallas::Base> for ComplianceCircuit {
         let merkle_chip = MerklePoseidonChip::construct(config.merkle_config);
 
         // Construct a blake2s chip
-        let blake2s_chip = Blake2sChip::construct(config.blake2s_config);
+        // let blake2s_chip = Blake2sChip::construct(config.blake2s_config);
 
         // Construct a resource_commit chip
         let resource_commit_chip = ResourceCommitChip::construct(config.resource_commit_config);
@@ -283,22 +285,39 @@ impl Circuit<pallas::Base> for ComplianceCircuit {
             config.advices[0],
             Value::known(self.input_vp_cm_r),
         )?;
-        let input_vp_commitment = vp_commitment_gadget(
-            &mut layouter,
-            &blake2s_chip,
-            input_resource_variables.resource_variables.logic.clone(),
-            input_vp_cm_r,
+
+        // let vp_commitment_personalization = assign_free_advice(
+        //     layouter.namespace(|| "constant VP_COMMITMENT_PERSONALIZATION_TO_FIELD"),
+        //     config.advices[0],
+        //     Value::known(*VP_COMMITMENT_PERSONALIZATION_TO_FIELD),
+        // )?;
+
+        let input_vp_commitment = poseidon_hash_gadget(
+            config.poseidon_config.clone(),
+            layouter.namespace(|| "input vp commitment"),
+            [
+                // vp_commitment_personalization.clone(),
+                input_resource_variables.resource_variables.logic.clone(),
+                input_vp_cm_r,
+            ],
         )?;
-        layouter.constrain_instance(
-            input_vp_commitment[0].cell(),
-            config.instances,
-            COMPLIANCE_INPUT_VP_CM_1_ROW_IDX,
-        )?;
-        layouter.constrain_instance(
-            input_vp_commitment[1].cell(),
-            config.instances,
-            COMPLIANCE_INPUT_VP_CM_2_ROW_IDX,
-        )?;
+
+        // let input_vp_commitment = vp_commitment_gadget(
+        //     &mut layouter,
+        //     &blake2s_chip,
+        //     input_resource_variables.resource_variables.logic.clone(),
+        //     input_vp_cm_r,
+        // )?;
+        // layouter.constrain_instance(
+        //     input_vp_commitment.cell(),
+        //     config.instances,
+        //     COMPLIANCE_INPUT_VP_CM_1_ROW_IDX,
+        // )?;
+        // layouter.constrain_instance(
+        //     input_vp_commitment.cell(),
+        //     config.instances,
+        //     COMPLIANCE_INPUT_VP_CM_2_ROW_IDX,
+        // )?;
 
         // Output resource application VP commitment
         let output_vp_cm_r = assign_free_advice(
@@ -306,22 +325,33 @@ impl Circuit<pallas::Base> for ComplianceCircuit {
             config.advices[0],
             Value::known(self.output_vp_cm_r),
         )?;
-        let output_vp_commitment = vp_commitment_gadget(
-            &mut layouter,
-            &blake2s_chip,
-            output_resource_vars.resource_variables.logic.clone(),
-            output_vp_cm_r,
+
+        let output_vp_commitment = poseidon_hash_gadget(
+            config.poseidon_config,
+            layouter.namespace(|| "output vp commitment"),
+            [
+                // vp_commitment_personalization,
+                output_resource_vars.resource_variables.logic.clone(),
+                output_vp_cm_r,
+            ],
         )?;
-        layouter.constrain_instance(
-            output_vp_commitment[0].cell(),
-            config.instances,
-            COMPLIANCE_OUTPUT_VP_CM_1_ROW_IDX,
-        )?;
-        layouter.constrain_instance(
-            output_vp_commitment[1].cell(),
-            config.instances,
-            COMPLIANCE_OUTPUT_VP_CM_2_ROW_IDX,
-        )?;
+
+        // let output_vp_commitment = vp_commitment_gadget(
+        //     &mut layouter,
+        //     &blake2s_chip,
+        //     output_resource_vars.resource_variables.logic.clone(),
+        //     output_vp_cm_r,
+        // )?;
+        // layouter.constrain_instance(
+        //     output_vp_commitment.cell(),
+        //     config.instances,
+        //     COMPLIANCE_OUTPUT_VP_CM_1_ROW_IDX,
+        // )?;
+        // layouter.constrain_instance(
+        //     output_vp_commitment.cell(),
+        //     config.instances,
+        //     COMPLIANCE_OUTPUT_VP_CM_2_ROW_IDX,
+        // )?;
 
         Ok(())
     }
