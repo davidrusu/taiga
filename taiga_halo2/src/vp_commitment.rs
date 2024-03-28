@@ -1,6 +1,4 @@
-use crate::{constant::VP_COMMITMENT_PERSONALIZATION, utils::poseidon_hash_n};
-use blake2s_simd::Params;
-use byteorder::{ByteOrder, LittleEndian};
+use crate::{constant::VP_COMMITMENT_PERSONALIZATION_TO_FIELD, utils::poseidon_hash_n};
 use ff::PrimeField;
 use pasta_curves::pallas;
 #[cfg(feature = "nif")]
@@ -18,8 +16,9 @@ pub struct ValidityPredicateCommitment(Fp);
 impl ValidityPredicateCommitment {
     pub fn commit(vp: Fp, rcm: Fp) -> Self {
         Self(poseidon_hash_n([
-            // VP_COMMITMENT_PERSONALIZATION,
-            vp, rcm,
+            *VP_COMMITMENT_PERSONALIZATION_TO_FIELD,
+            vp,
+            rcm,
         ]))
     }
 

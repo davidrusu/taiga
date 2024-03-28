@@ -1,7 +1,5 @@
 use crate::{
     circuit::{
-        // blake2s::publicize_default_dynamic_vp_commitments,
-        // blake2s::Blake2sConfig,
         gadgets::{
             add::{AddChip, AddConfig},
             assign_free_advice,
@@ -322,7 +320,6 @@ pub struct ValidityPredicateConfig {
     pub add_config: AddConfig,
     pub sub_config: SubConfig,
     pub mul_config: MulConfig,
-    // pub blake2s_config: Blake2sConfig<pallas::Base>,
     pub resource_commit_config: ResourceCommitConfig,
 }
 
@@ -395,7 +392,7 @@ impl ValidityPredicateConfig {
 
         let extended_or_relation_config =
             ExtendedOrRelationConfig::configure(meta, [advices[0], advices[1], advices[2]]);
-        // let blake2s_config = Blake2sConfig::configure(meta, advices);
+
         let resource_commit_config = ResourceCommitChip::configure(
             meta,
             advices[0..3].try_into().unwrap(),
@@ -416,7 +413,6 @@ impl ValidityPredicateConfig {
             add_config,
             sub_config,
             mul_config,
-            // blake2s_config,
             resource_commit_config,
         }
     }

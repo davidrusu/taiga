@@ -58,10 +58,8 @@ pub const COMPLIANCE_ANCHOR_PUBLIC_INPUT_ROW_IDX: usize = 1;
 pub const COMPLIANCE_OUTPUT_CM_PUBLIC_INPUT_ROW_IDX: usize = 2;
 pub const COMPLIANCE_DELTA_CM_X_PUBLIC_INPUT_ROW_IDX: usize = 3;
 pub const COMPLIANCE_DELTA_CM_Y_PUBLIC_INPUT_ROW_IDX: usize = 4;
-pub const COMPLIANCE_INPUT_VP_CM_1_ROW_IDX: usize = 5;
-// pub const COMPLIANCE_INPUT_VP_CM_2_ROW_IDX: usize = 6;
-pub const COMPLIANCE_OUTPUT_VP_CM_1_ROW_IDX: usize = 6;
-// pub const COMPLIANCE_OUTPUT_VP_CM_2_ROW_IDX: usize = 8;
+pub const COMPLIANCE_INPUT_VP_CM_ROW_IDX: usize = 5;
+pub const COMPLIANCE_OUTPUT_VP_CM_ROW_IDX: usize = 6;
 
 pub const POSEIDON_TO_CURVE_INPUT_LEN: usize = 3;
 pub const CURVE_ID: &str = "pallas";
