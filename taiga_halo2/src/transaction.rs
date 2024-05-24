@@ -324,7 +324,7 @@ impl TransparentPartialTxBundle {
 #[cfg(test)]
 pub mod testing {
     use crate::shielded_ptx::testing::create_shielded_ptx;
-    use crate::transaction::{ShieldedPartialTxBundle, TransparentPartialTxBundle};
+    use crate::transaction::ShieldedPartialTxBundle;
     #[cfg(feature = "borsh")]
     use crate::transparent_ptx::testing::create_transparent_ptx;
 

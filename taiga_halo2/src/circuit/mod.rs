@@ -5,7 +5,6 @@ pub mod merkle_circuit;
 // pub mod resource_circuit;
 #[macro_use]
 pub mod vp_circuit;
-pub mod blake2s;
 pub mod curve;
 pub mod hash_to_curve;
 pub mod resource_commitment;

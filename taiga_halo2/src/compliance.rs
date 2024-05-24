@@ -59,18 +59,16 @@ pub struct ComplianceInfo {
 
 impl CompliancePublicInputs {
     pub fn to_instance(&self) -> Vec<pallas::Base> {
-        let input_vp_commitment = self.input_vp_commitment.to_public_inputs();
-        let output_vp_commitment = self.output_vp_commitment.to_public_inputs();
+        let input_vp_commitment = self.input_vp_commitment.to_public_input();
+        let output_vp_commitment = self.output_vp_commitment.to_public_input();
         vec![
             self.nf.inner(),
             self.anchor.inner(),
             self.cm.inner(),
             self.delta.get_x(),
             self.delta.get_y(),
-            input_vp_commitment[0],
-            input_vp_commitment[1],
-            output_vp_commitment[0],
-            output_vp_commitment[1],
+            input_vp_commitment,
+            output_vp_commitment,
         ]
     }
 }
@@ -196,11 +194,11 @@ impl ComplianceInfo {
 
         let input_vp_cm_r = self.get_input_vp_com_r();
         let input_vp_commitment =
-            ValidityPredicateCommitment::commit(&self.input_resource.get_logic(), &input_vp_cm_r);
+            ValidityPredicateCommitment::commit(self.input_resource.get_logic(), input_vp_cm_r);
 
         let output_vp_cm_r = self.get_output_vp_com_r();
         let output_vp_commitment =
-            ValidityPredicateCommitment::commit(&self.output_resource.get_logic(), &output_vp_cm_r);
+            ValidityPredicateCommitment::commit(self.output_resource.get_logic(), output_vp_cm_r);
 
         let compliance = CompliancePublicInputs {
             nf,

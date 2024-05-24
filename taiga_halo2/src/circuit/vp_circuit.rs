@@ -1,7 +1,5 @@
 use crate::{
     circuit::{
-        blake2s::publicize_default_dynamic_vp_commitments,
-        blake2s::Blake2sConfig,
         gadgets::{
             add::{AddChip, AddConfig},
             assign_free_advice,
@@ -20,18 +18,19 @@ use crate::{
     },
     constant::{
         TaigaFixedBases, NUM_RESOURCE, RESOURCE_ENCRYPTION_CIPHERTEXT_NUM, SETUP_PARAMS_MAP,
-        VP_CIRCUIT_NULLIFIER_ONE_PUBLIC_INPUT_IDX, VP_CIRCUIT_NULLIFIER_TWO_PUBLIC_INPUT_IDX,
-        VP_CIRCUIT_OUTPUT_CM_ONE_PUBLIC_INPUT_IDX, VP_CIRCUIT_OUTPUT_CM_TWO_PUBLIC_INPUT_IDX,
-        VP_CIRCUIT_OWNED_RESOURCE_ID_PUBLIC_INPUT_IDX, VP_CIRCUIT_PARAMS_SIZE,
-        VP_CIRCUIT_PUBLIC_INPUT_NUM, VP_CIRCUIT_RESOURCE_ENCRYPTION_PK_X_IDX,
-        VP_CIRCUIT_RESOURCE_ENCRYPTION_PK_Y_IDX,
-        VP_CIRCUIT_RESOURCE_ENCRYPTION_PUBLIC_INPUT_BEGIN_IDX,
+        VP_CIRCUIT_FIRST_DYNAMIC_VP_CM_1, VP_CIRCUIT_NULLIFIER_ONE_PUBLIC_INPUT_IDX,
+        VP_CIRCUIT_NULLIFIER_TWO_PUBLIC_INPUT_IDX, VP_CIRCUIT_OUTPUT_CM_ONE_PUBLIC_INPUT_IDX,
+        VP_CIRCUIT_OUTPUT_CM_TWO_PUBLIC_INPUT_IDX, VP_CIRCUIT_OWNED_RESOURCE_ID_PUBLIC_INPUT_IDX,
+        VP_CIRCUIT_PARAMS_SIZE, VP_CIRCUIT_PUBLIC_INPUT_NUM,
+        VP_CIRCUIT_RESOURCE_ENCRYPTION_PK_X_IDX, VP_CIRCUIT_RESOURCE_ENCRYPTION_PK_Y_IDX,
+        VP_CIRCUIT_RESOURCE_ENCRYPTION_PUBLIC_INPUT_BEGIN_IDX, VP_CIRCUIT_SECOND_DYNAMIC_VP_CM_1,
     },
     error::TransactionError,
     proof::Proof,
     resource::{RandomSeed, Resource, ResourceCommitment},
     resource_encryption::{ResourceCiphertext, SecretKey},
     utils::mod_r_p,
+    vp_commitment::ValidityPredicateCommitment,
     vp_vk::ValidityPredicateVerifyingKey,
 };
 use dyn_clone::{clone_trait_object, DynClone};
@@ -321,7 +320,6 @@ pub struct ValidityPredicateConfig {
     pub add_config: AddConfig,
     pub sub_config: SubConfig,
     pub mul_config: MulConfig,
-    pub blake2s_config: Blake2sConfig<pallas::Base>,
     pub resource_commit_config: ResourceCommitConfig,
 }
 
@@ -394,7 +392,7 @@ impl ValidityPredicateConfig {
 
         let extended_or_relation_config =
             ExtendedOrRelationConfig::configure(meta, [advices[0], advices[1], advices[2]]);
-        let blake2s_config = Blake2sConfig::configure(meta, advices);
+
         let resource_commit_config = ResourceCommitChip::configure(
             meta,
             advices[0..3].try_into().unwrap(),
@@ -415,7 +413,6 @@ impl ValidityPredicateConfig {
             add_config,
             sub_config,
             mul_config,
-            blake2s_config,
             resource_commit_config,
         }
     }
@@ -548,6 +545,23 @@ pub trait ValidityPredicateCircuit: Circuit<pallas::Base> + ValidityPredicateVer
     // The owned_resource_id is the key to look up the target variables and
     // help determine whether the owned resource is the input resource or not in VP circuit.
     fn get_owned_resource_id(&self) -> pallas::Base;
+}
+
+pub fn publicize_default_dynamic_vp_commitments(
+    layouter: &mut impl Layouter<pallas::Base>,
+    advice: Column<Advice>,
+    instances: Column<Instance>,
+) -> Result<(), Error> {
+    let vp_cm = assign_free_advice(
+        layouter.namespace(|| "vp_cm"),
+        advice,
+        Value::known(ValidityPredicateCommitment::default().to_public_input()),
+    )?;
+
+    layouter.constrain_instance(vp_cm.cell(), instances, VP_CIRCUIT_FIRST_DYNAMIC_VP_CM_1)?;
+    layouter.constrain_instance(vp_cm.cell(), instances, VP_CIRCUIT_SECOND_DYNAMIC_VP_CM_1)?;
+
+    Ok(())
 }
 
 /// BasicValidityPredicateVariables are generally constrained in ValidityPredicateCircuit::basic_constraints

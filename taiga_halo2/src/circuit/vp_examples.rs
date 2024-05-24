@@ -186,10 +186,8 @@ impl ValidityPredicateCircuit for TrivialValidityPredicateCircuit {
 
     fn get_public_inputs(&self, mut rng: impl RngCore) -> ValidityPredicatePublicInputs {
         let mut public_inputs = self.get_mandatory_public_inputs();
-        let default_vp_cm: [pallas::Base; 2] =
-            ValidityPredicateCommitment::default().to_public_inputs();
-        public_inputs.extend(default_vp_cm);
-        public_inputs.extend(default_vp_cm);
+        let default_vp_cm: pallas::Base = ValidityPredicateCommitment::default().to_public_input();
+        public_inputs.extend([default_vp_cm, default_vp_cm]);
         let padding = ValidityPredicatePublicInputs::get_public_input_padding(
             public_inputs.len(),
             &RandomSeed::random(&mut rng),
