@@ -147,7 +147,9 @@ lazy_static! {
             .unwrap();
         let empty_circuit: ComplianceCircuit = Default::default();
         let vk = keygen_vk(params, &empty_circuit).expect("keygen_vk should not fail");
-        keygen_pk(params, vk, &empty_circuit).expect("keygen_pk should not fail")
+        let pk = keygen_pk(params, vk, &empty_circuit).expect("keygen_pk should not fail");
+        println!("COMPLIANCE_PROVING_KEY {} bytes", pk.to_bytes().len());
+        pk
     };
 }
 
